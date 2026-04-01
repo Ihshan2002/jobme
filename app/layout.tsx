@@ -17,8 +17,17 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'JobMe Admin',
-  description: 'JobMe Admin Dashboard',
+  title: 'JobMe',                        
+  description: 'Find Your Dream Job',
+  icons: {
+    icon: '/favicon.ico',        
+    apple: '/icon.png',
+  },
+  openGraph: {
+    title: 'JobMe',
+    description: 'Find Your Dream Job',
+    images: [{ url: '/jobme_og_image.svg', width: 1200, height: 630 }],
+  },
 };
 
 export default function RootLayout({
