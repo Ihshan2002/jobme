@@ -14,6 +14,7 @@ export async function createUser(
   fullName: string,
   role: UserRole
 ): Promise<ActionResult> {
+  // Step 1: Create user
   const { data, error: authError } = await supabaseAdmin.auth.admin.createUser({
     email,
     password,
@@ -22,6 +23,14 @@ export async function createUser(
   });
 
   if (authError) return { success: false, error: authError.message };
+
+  // Step 2: Force confirm — this is the key fix!
+  await supabaseAdmin.auth.admin.updateUserById(data.user.id, {
+    email_confirm: true,
+  });
+
+  // Step 3: Update profile
+  await new Promise((resolve) => setTimeout(resolve, 300));
 
   const { error: profileError } = await supabaseAdmin
     .from('profiles')

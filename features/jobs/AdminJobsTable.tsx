@@ -33,7 +33,7 @@ interface Job {
   status: 'pending' | 'approved' | 'rejected';
   created_at: string;
   skills: string[];
-  profiles: { full_name: string | null; email: string } | null;
+  profiles: { full_name: string | null; email: string }[] | null;
 }
 
 function StatusBadge({ status }: { status: Job['status'] }) {
@@ -175,7 +175,7 @@ export function AdminJobsTable({ jobs }: { jobs: Job[] }) {
                   <TableCell className="font-medium">{job.title}</TableCell>
                   <TableCell className="text-muted-foreground">{job.company_name}</TableCell>
                   <TableCell className="text-muted-foreground text-sm">
-                    {job.profiles?.full_name ?? job.profiles?.email ?? '—'}
+                    {job.profiles?.[0]?.full_name || job.profiles?.[0]?.email || '—'}
                   </TableCell>
                   <TableCell className="capitalize text-sm text-muted-foreground">
                     {job.job_type}

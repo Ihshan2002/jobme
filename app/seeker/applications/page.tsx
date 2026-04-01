@@ -22,7 +22,7 @@ interface Application {
     company_name: string;
     location: string;
     job_type: string;
-  };
+  }[] | null;
 }
 
 function StatusBadge({ status }: { status: Application['status'] }) {
@@ -65,7 +65,7 @@ const supabase = useMemo(() => createBrowserClient(
         .eq('seeker_id', user.id)
         .order('created_at', { ascending: false });
 
-      setApplications((data as Application[]) ?? []);
+      setApplications((data as unknown as Application[]) ?? []);
       setLoading(false);
     }
     load();
@@ -136,22 +136,22 @@ const supabase = useMemo(() => createBrowserClient(
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-2 flex-wrap">
                       <h3 className="font-semibold text-slate-900 dark:text-white">
-                        {app.jobs.title}
+                        {app.jobs?.[0]?.title}
                       </h3>
                       <StatusBadge status={app.status} />
                     </div>
                     <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-zinc-400 flex-wrap">
                       <span className="flex items-center gap-1">
                         <Briefcase className="h-3.5 w-3.5" />
-                        {app.jobs.company_name}
+                        {app.jobs?.[0]?.company_name}
                       </span>
                       <span className="flex items-center gap-1">
                         <MapPin className="h-3.5 w-3.5" />
-                        {app.jobs.location}
+                        {app.jobs?.[0]?.location}
                       </span>
                       <span className="flex items-center gap-1 capitalize">
                         <Clock className="h-3.5 w-3.5" />
-                        {app.jobs.job_type}
+                        {app.jobs?.[0]?.job_type}
                       </span>
                     </div>
                     {app.cover_letter && (
