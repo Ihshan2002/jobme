@@ -5,11 +5,12 @@ import { usePathname, useRouter } from 'next/navigation';
 import { LayoutDashboard, Users, Briefcase, BarChart2, Shield, LogOut, ChevronRight } from 'lucide-react';
 import { createBrowserClient } from '@supabase/ssr';
 import { ThemeToggle } from './ThemeToggle';
+import { useMemo } from 'react';
 
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/dashboard',         icon: LayoutDashboard },
   { label: 'Users',     href: '/dashboard/users',   icon: Users           },
-  { label: 'Jobs',      href: '/dashboard/jobs',    icon: Briefcase, soon: true },
+  { label: 'Jobs',      href: '/dashboard/jobs',    icon: Briefcase,  },
   { label: 'Reports',   href: '/dashboard/reports', icon: BarChart2, soon: true },
 ];
 
@@ -17,10 +18,10 @@ export function Sidebar() {
   const pathname = usePathname();
   const router   = useRouter();
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+ const supabase = useMemo(() => createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+), []);
 
   async function handleLogout() {
     await supabase.auth.signOut();
