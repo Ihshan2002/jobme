@@ -114,7 +114,7 @@ export function ChatBot() {
                     <Bot size={14} className="text-white" />
                   </div>
                   <div className="bg-white dark:bg-zinc-800 rounded-2xl rounded-tl-none px-3 py-2 shadow-sm text-sm text-slate-700 dark:text-zinc-300 max-w-[80%]">
-                    👋 Hi! I&apos;m your JobMe Assistant. I can help you find jobs,
+                    Hi! I&apos;m your JobMe Assistant. I can help you find jobs,
                     improve your resume, and prepare for interviews!
                   </div>
                 </div>
