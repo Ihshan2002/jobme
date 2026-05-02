@@ -2,26 +2,35 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LayoutDashboard, Users, Briefcase, BarChart2, Shield, LogOut, ChevronRight } from 'lucide-react';
+import { 
+  LayoutDashboard, 
+  Users, 
+  Briefcase, 
+  BarChart2, 
+  Shield, 
+  LogOut, 
+  ChevronRight,
+  Activity
+} from 'lucide-react';
 import { createBrowserClient } from '@supabase/ssr';
 import { ThemeToggle } from './ThemeToggle';
 import { useMemo } from 'react';
 
 const NAV_ITEMS = [
-  { label: 'Dashboard', href: '/dashboard',         icon: LayoutDashboard },
-  { label: 'Users',     href: '/dashboard/users',   icon: Users           },
-  { label: 'Jobs',      href: '/dashboard/jobs',    icon: Briefcase,  },
-  { label: 'Reports',   href: '/dashboard/reports', icon: BarChart2, soon: true },
+  { label: 'Overview',   href: '/dashboard',         icon: LayoutDashboard },
+  { label: 'User Index', href: '/dashboard/users',    icon: Users           },
+  { label: 'Job Registry', href: '/dashboard/jobs',     icon: Briefcase       },
+  { label: 'Analytics',  href: '/dashboard/reports',  icon: BarChart2, soon: true },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
   const router   = useRouter();
 
- const supabase = useMemo(() => createBrowserClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-), []);
+  const supabase = useMemo(() => createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  ), []);
 
   async function handleLogout() {
     await supabase.auth.signOut();
@@ -29,29 +38,32 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-56 z-50 flex flex-col bg-white dark:bg-zinc-950 border-r border-slate-200 dark:border-zinc-800">
+    <aside className="fixed left-0 top-0 h-screen w-60 z-50 flex flex-col bg-white dark:bg-zinc-950 border-r border-slate-200 dark:border-zinc-800">
 
-      {/* Logo */}
-      <div className="px-5 py-5 border-b border-slate-200 dark:border-zinc-800">
-        <div className="flex items-center gap-2.5">
-          <div className="p-1.5 bg-blue-600 rounded-md">
+      {/* Corporate Branding */}
+      <div className="px-6 py-6 border-b border-slate-200 dark:border-zinc-800 bg-[#fcfcfd] dark:bg-zinc-900/20">
+        <div className="flex items-center gap-3">
+          <div className="p-1.5 bg-slate-900 dark:bg-blue-600 rounded shadow-sm">
             <Shield className="h-4 w-4 text-white" strokeWidth={2.5} />
           </div>
           <div>
-            <span className="font-bold text-slate-900 dark:text-white text-base tracking-tight">
-              Job<span className="text-blue-600">Me</span>
+            <span className="font-black text-slate-900 dark:text-white text-[13px] tracking-tighter uppercase">
+              Job<span className="text-blue-600">Me</span> <span className="text-slate-400 font-medium">Core</span>
             </span>
-            <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-medium tracking-wide">
-              Admin Panel
-            </p>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <p className="text-[9px] text-slate-500 dark:text-zinc-500 font-bold tracking-[0.1em] uppercase">
+                System Active
+              </p>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1 px-3 py-4 space-y-0.5">
-        <p className="text-[10px] font-semibold text-slate-400 dark:text-zinc-600 uppercase tracking-widest px-3 mb-2">
-          Menu
+      {/* Navigation Registry */}
+      <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
+        <p className="text-[10px] font-black text-slate-400 dark:text-zinc-600 uppercase tracking-[0.2em] px-4 mb-4">
+          Management
         </p>
         {NAV_ITEMS.map((item) => {
           const isActive = pathname === item.href;
@@ -61,37 +73,42 @@ export function Sidebar() {
               key={item.href}
               href={item.soon ? '#' : item.href}
               className={`
-                flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all
-                ${item.soon ? 'cursor-not-allowed opacity-40' : ''}
+                group flex items-center gap-3 px-4 py-2.5 rounded transition-all
+                ${item.soon ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}
                 ${isActive
-                  ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400'
-                  : 'text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-900 hover:text-slate-900 dark:hover:text-white'
+                  ? 'bg-slate-900 dark:bg-blue-600 text-white shadow-lg shadow-blue-500/10'
+                  : 'text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-900 hover:text-slate-900 dark:hover:text-white'
                 }
               `}
             >
-              <Icon className="h-4 w-4 shrink-0" />
-              <span className="flex-1">{item.label}</span>
-              {item.soon
-                ? <span className="text-[9px] font-bold tracking-wider text-slate-400 dark:text-zinc-600 uppercase">Soon</span>
-                : isActive && <ChevronRight className="h-3.5 w-3.5 opacity-60" />
-              }
+              <Icon className={`h-4 w-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-blue-500'}`} />
+              <span className="flex-1 text-[12px] font-bold tracking-tight uppercase">{item.label}</span>
+              {item.soon ? (
+                <span className="text-[8px] font-black tracking-widest text-slate-400 dark:text-zinc-700 bg-slate-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded uppercase">Soon</span>
+              ) : (
+                <ChevronRight className={`h-3 w-3 transition-transform ${isActive ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2 group-hover:opacity-40 group-hover:translate-x-0'}`} />
+              )}
             </Link>
           );
         })}
       </nav>
 
-      {/* Bottom */}
-      <div className="px-3 py-4 border-t border-slate-200 dark:border-zinc-800 space-y-1">
-        <div className="flex items-center justify-between px-3 py-2">
-          <span className="text-sm font-medium text-slate-600 dark:text-zinc-400">Theme</span>
+      {/* System Footer */}
+      <div className="p-4 bg-[#fcfcfd] dark:bg-zinc-900/20 border-t border-slate-200 dark:border-zinc-800 space-y-2">
+        <div className="flex items-center justify-between px-2 mb-2">
+          <div className="flex items-center gap-2">
+             <Activity size={12} className="text-slate-400" />
+             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">Dark Mode</span>
+          </div>
           <ThemeToggle />
         </div>
+        
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium w-full text-slate-600 dark:text-zinc-400 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-600 dark:hover:text-red-400 transition-all"
+          className="group flex items-center gap-3 px-4 py-2.5 rounded text-slate-500 dark:text-zinc-400 hover:bg-rose-50 dark:hover:bg-rose-950/20 hover:text-rose-600 transition-all w-full text-left"
         >
-          <LogOut className="h-4 w-4" />
-          <span>Logout</span>
+          <LogOut size={14} className="group-hover:-translate-x-1 transition-transform" />
+          <span className="text-[11px] font-black uppercase tracking-widest">Terminate Session</span>
         </button>
       </div>
     </aside>

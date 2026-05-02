@@ -14,6 +14,9 @@ import {
   Shield,
   LogOut,
   Building2,
+  ChevronRight,
+  TrendingUp,
+  LayoutGrid
 } from 'lucide-react';
 import { ThemeToggle } from '@/components/layout/ThemeToggle';
 
@@ -36,16 +39,15 @@ export default function RecruiterDashboard() {
   const [loading, setLoading] = useState(true);
 
   const supabase = useMemo(() => createBrowserClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-), []);
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  ), []);
 
   useEffect(() => {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { router.push('/auth/login'); return; }
 
-      // Fetch profile
       const { data: prof } = await supabase
         .from('profiles')
         .select('full_name, email, role')
@@ -55,7 +57,6 @@ export default function RecruiterDashboard() {
       if (prof?.role !== 'recruiter') { router.push('/auth/login'); return; }
       setProfile(prof);
 
-      // Fetch stats
       const { data: jobs } = await supabase
         .from('jobs')
         .select('id, status')
@@ -81,7 +82,7 @@ export default function RecruiterDashboard() {
       setLoading(false);
     }
     load();
-  }, []);
+  }, [router, supabase]);
 
   async function handleLogout() {
     await supabase.auth.signOut();
@@ -91,120 +92,128 @@ export default function RecruiterDashboard() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-zinc-950">
-        <div className="text-slate-400 dark:text-zinc-500 text-sm">Loading...</div>
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-5 w-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <div className="text-slate-500 dark:text-zinc-500 text-[11px] font-bold uppercase tracking-widest">Initializing Session</div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-zinc-950">
+    <div className="min-h-screen bg-[#fcfcfd] dark:bg-zinc-950 font-sans selection:bg-blue-100 dark:selection:bg-blue-900/30">
 
-      {/* Header */}
-      <header className="bg-white dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 px-6 py-4">
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 bg-blue-600 rounded-md">
-              <Shield className="h-4 w-4 text-white" strokeWidth={2.5} />
+      {/* Enterprise Top Bar */}
+      <nav className="sticky top-0 z-50 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-slate-200 dark:border-zinc-800 px-6 h-14 flex items-center">
+        <div className="max-w-6xl mx-auto w-full flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2">
+              <div className="p-1 bg-slate-900 dark:bg-blue-600 rounded shadow-sm">
+                <Shield className="h-3.5 w-3.5 text-white" strokeWidth={2.5} />
+              </div>
+              <span className="font-bold text-sm text-slate-900 dark:text-white tracking-tight uppercase">
+                Job<span className="text-blue-600">Me</span> <span className="text-slate-400 dark:text-zinc-600 font-medium">Recruiter</span>
+              </span>
             </div>
-            <span className="font-bold text-slate-900 dark:text-white">
-              Job<span className="text-blue-600">Me</span>
-            </span>
           </div>
-          <div className="flex items-center gap-3">
+          
+          <div className="flex items-center gap-4">
             <ThemeToggle />
+            <div className="h-4 w-[1px] bg-slate-200 dark:border-zinc-800" />
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 text-sm text-slate-500 dark:text-zinc-400 hover:text-red-500 transition-colors"
+              className="flex items-center gap-2 text-[11px] font-bold text-slate-500 dark:text-zinc-500 hover:text-rose-600 dark:hover:text-rose-400 transition-colors uppercase tracking-tight"
             >
-              <LogOut className="h-4 w-4" />
-              Logout
+              <LogOut className="h-3.5 w-3.5" />
+              Terminate
             </button>
           </div>
         </div>
-      </header>
+      </nav>
 
-      {/* Main */}
-      <main className="max-w-5xl mx-auto px-6 py-8 space-y-8">
+      <main className="max-w-6xl mx-auto px-6 py-10">
 
-        {/* Welcome */}
-        <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 p-6">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-blue-50 dark:bg-blue-950/40 rounded-xl">
-              <Building2 className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+        {/* Dynamic Welcome Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 pb-8 border-b border-slate-200 dark:border-zinc-900">
+          <div>
+            <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 mb-1">
+              <LayoutGrid size={14} />
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Recruiter Console</span>
             </div>
-            <div>
-              <h1 className="text-xl font-semibold text-slate-900 dark:text-white">
-                Welcome, {profile?.full_name ?? 'Recruiter'}! 👋
-              </h1>
-              <p className="text-sm text-slate-500 dark:text-zinc-400 mt-0.5">
-                {profile?.email}
-              </p>
-            </div>
+            <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tighter">
+              Welcome, {profile?.full_name?.split(' ')[0] ?? 'Operator'}
+            </h1>
+            <p className="text-sm text-slate-500 dark:text-zinc-400 font-medium mt-1">
+              Platform status: <span className="text-emerald-600 dark:text-emerald-500">Operational</span> • {profile?.email}
+            </p>
           </div>
+
+          <Link
+            href="/recruiter/jobs/new"
+            className="h-10 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded shadow-lg shadow-blue-500/20 transition-all active:scale-95 flex items-center gap-2 text-xs font-bold uppercase tracking-wide"
+          >
+            <PlusCircle className="h-4 w-4" />
+            Create Posting
+          </Link>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 p-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-blue-50 dark:bg-blue-950/40 rounded-lg">
-                <Briefcase className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+        {/* Stats Registry */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
+          {[
+            { label: 'Platform Listings', val: stats.totalJobs, icon: Briefcase, color: 'text-slate-600', sub: 'Total History' },
+            { label: 'Active Pipeline', val: stats.activeJobs, icon: TrendingUp, color: 'text-emerald-600', sub: 'Live & Approved' },
+            { label: 'Talent Pool', val: stats.totalApplications, icon: Users, color: 'text-blue-600', sub: 'New Submissions' },
+          ].map((s, i) => (
+            <div key={i} className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-5 rounded-lg shadow-sm group hover:border-blue-500/50 transition-colors">
+              <div className="flex justify-between items-start mb-3">
+                <div className={`p-2 rounded bg-slate-50 dark:bg-zinc-800 border border-slate-100 dark:border-zinc-800 ${s.color}`}>
+                  <s.icon size={18} />
+                </div>
+                <div className="text-[10px] font-bold text-slate-400 dark:text-zinc-600 uppercase tracking-widest">Metric-0{i+1}</div>
               </div>
-              <span className="text-sm font-medium text-slate-500 dark:text-zinc-400">Total Jobs</span>
+              <p className="text-[11px] font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-wider">{s.label}</p>
+              <h3 className="text-3xl font-black text-slate-900 dark:text-white mt-1 tabular-nums tracking-tight">{s.val}</h3>
+              <p className="text-[10px] text-slate-400 dark:text-zinc-600 mt-2 font-medium uppercase">{s.sub}</p>
             </div>
-            <p className="text-3xl font-bold text-slate-900 dark:text-white">{stats.totalJobs}</p>
-            <p className="text-xs text-slate-400 dark:text-zinc-500 mt-1">Posted jobs</p>
-          </div>
-
-          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 p-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-emerald-50 dark:bg-emerald-950/40 rounded-lg">
-                <FileText className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-              </div>
-              <span className="text-sm font-medium text-slate-500 dark:text-zinc-400">Active Jobs</span>
-            </div>
-            <p className="text-3xl font-bold text-slate-900 dark:text-white">{stats.activeJobs}</p>
-            <p className="text-xs text-slate-400 dark:text-zinc-500 mt-1">Approved & live</p>
-          </div>
-
-          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 p-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-purple-50 dark:bg-purple-950/40 rounded-lg">
-                <Users className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-              </div>
-              <span className="text-sm font-medium text-slate-500 dark:text-zinc-400">Applicants</span>
-            </div>
-            <p className="text-3xl font-bold text-slate-900 dark:text-white">{stats.totalApplications}</p>
-            <p className="text-xs text-slate-400 dark:text-zinc-500 mt-1">Total applications</p>
-          </div>
+          ))}
         </div>
 
-        {/* Quick Actions */}
-        <div>
-          <h2 className="text-sm font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-widest mb-4">
-            Quick Actions
+        {/* Functional Shortcuts */}
+        <div className="space-y-4">
+          <h2 className="text-[11px] font-bold text-slate-400 dark:text-zinc-600 uppercase tracking-[0.25em]">
+            Registry Access
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Link
-              href="/recruiter/jobs/new"
-              className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 p-5 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-sm transition-all group"
+              href="/recruiter/jobs"
+              className="group flex items-center justify-between p-4 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-md hover:border-blue-500 hover:bg-blue-50/30 dark:hover:bg-blue-500/5 transition-all"
             >
-              <div className="p-2.5 bg-blue-50 dark:bg-blue-950/40 rounded-xl w-fit mb-3 group-hover:bg-blue-100 transition-colors">
-                <PlusCircle className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <div className="flex items-center gap-4">
+                <div className="h-10 w-10 flex items-center justify-center bg-slate-100 dark:bg-zinc-800 rounded border border-slate-200 dark:border-zinc-800 group-hover:bg-blue-600 group-hover:border-blue-600 transition-all">
+                  <Briefcase className="h-5 w-5 text-slate-600 dark:text-zinc-400 group-hover:text-white" />
+                </div>
+                <div>
+                  <p className="text-[13px] font-bold text-slate-900 dark:text-white uppercase tracking-tight">Active Inventory</p>
+                  <p className="text-[11px] text-slate-500 dark:text-zinc-500 font-medium uppercase">Modify and monitor current listings</p>
+                </div>
               </div>
-              <p className="font-semibold text-slate-900 dark:text-white text-sm">Post a Job</p>
-              <p className="text-xs text-slate-400 dark:text-zinc-500 mt-1">Create a new job listing</p>
+              <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-blue-500 transition-colors" />
             </Link>
 
             <Link
-              href="/recruiter/jobs"
-              className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 p-5 hover:border-purple-300 dark:hover:border-purple-700 hover:shadow-sm transition-all group"
+              href="/recruiter/jobs/new"
+              className="group flex items-center justify-between p-4 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-md hover:border-emerald-500 hover:bg-emerald-50/30 dark:hover:bg-emerald-500/5 transition-all"
             >
-              <div className="p-2.5 bg-purple-50 dark:bg-purple-950/40 rounded-xl w-fit mb-3 group-hover:bg-purple-100 transition-colors">
-                <Briefcase className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+              <div className="flex items-center gap-4">
+                <div className="h-10 w-10 flex items-center justify-center bg-slate-100 dark:bg-zinc-800 rounded border border-slate-200 dark:border-zinc-800 group-hover:bg-emerald-600 group-hover:border-emerald-600 transition-all">
+                  <PlusCircle className="h-5 w-5 text-slate-600 dark:text-zinc-400 group-hover:text-white" />
+                </div>
+                <div>
+                  <p className="text-[13px] font-bold text-slate-900 dark:text-white uppercase tracking-tight">Expand Portfolio</p>
+                  <p className="text-[11px] text-slate-500 dark:text-zinc-500 font-medium uppercase">Initiate new talent acquisition</p>
+                </div>
               </div>
-              <p className="font-semibold text-slate-900 dark:text-white text-sm">My Jobs</p>
-              <p className="text-xs text-slate-400 dark:text-zinc-500 mt-1">Manage your job listings</p>
+              <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-emerald-500 transition-colors" />
             </Link>
           </div>
         </div>
