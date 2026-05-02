@@ -2,7 +2,7 @@
 
 // app/recruiter/jobs/new/page.tsx
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useMemo } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -15,6 +15,9 @@ import {
   Tag,
   Plus,
   X,
+  FileText,
+  Zap,
+  Lock
 } from 'lucide-react';
 
 const JOB_TYPES = ['full-time', 'part-time', 'contract', 'internship', 'remote'];
@@ -25,20 +28,20 @@ export default function PostJobPage() {
   const [error, setError] = useState('');
 
   // Form state
-  const [title, setTitle]           = useState('');
-  const [company, setCompany]       = useState('');
-  const [location, setLocation]     = useState('');
-  const [jobType, setJobType]       = useState('full-time');
-  const [salaryMin, setSalaryMin]   = useState('');
-  const [salaryMax, setSalaryMax]   = useState('');
+  const [title, setTitle]             = useState('');
+  const [company, setCompany]         = useState('');
+  const [location, setLocation]       = useState('');
+  const [jobType, setJobType]         = useState('full-time');
+  const [salaryMin, setSalaryMin]     = useState('');
+  const [salaryMax, setSalaryMax]     = useState('');
   const [description, setDescription] = useState('');
-  const [skillInput, setSkillInput] = useState('');
-  const [skills, setSkills]         = useState<string[]>([]);
+  const [skillInput, setSkillInput]   = useState('');
+  const [skills, setSkills]           = useState<string[]>([]);
 
-  const supabase = createBrowserClient(
+  const supabase = useMemo(() => createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  ), []);
 
   function addSkill() {
     const s = skillInput.trim();
@@ -54,7 +57,7 @@ export default function PostJobPage() {
 
   function handlePost() {
     if (!title || !company || !location || !description) {
-      setError('Please fill in all required fields.');
+      setError('REQUIRED_FIELDS_MISSING: Please complete all marked sections.');
       return;
     }
     setError('');
@@ -73,7 +76,7 @@ export default function PostJobPage() {
         salary_max: salaryMax ? parseInt(salaryMax) : null,
         description,
         skills,
-        status: 'pending', // Admin approval needed
+        status: 'pending', 
       });
 
       if (insertError) {
@@ -86,211 +89,234 @@ export default function PostJobPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-zinc-950">
-
+    <div className="min-h-screen bg-[#fcfcfd] dark:bg-zinc-950">
       {/* Header */}
-      <header className="bg-white dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 px-6 py-4">
-        <div className="max-w-3xl mx-auto flex items-center gap-4">
-          <Link
-            href="/recruiter/dashboard"
-            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Link>
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 bg-blue-600 rounded-md">
-              <Shield className="h-4 w-4 text-white" strokeWidth={2.5} />
+      <header className="bg-white dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 sticky top-0 z-40">
+        <div className="max-w-3xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            <Link
+              href="/recruiter/jobs"
+              className="flex items-center gap-2 text-[10px] font-black text-slate-400 hover:text-blue-600 uppercase tracking-widest transition-colors"
+            >
+              <ArrowLeft className="h-3 w-3" /> Abort Entry
+            </Link>
+            <div className="h-4 w-[1px] bg-slate-200 dark:bg-zinc-800" />
+            <div className="flex items-center gap-2">
+              <div className="p-1 bg-slate-900 dark:bg-blue-600 rounded-sm">
+                <Shield className="h-3.5 w-3.5 text-white" />
+              </div>
+              <span className="font-black text-sm tracking-tighter uppercase">
+                Job<span className="text-blue-600">Me</span> <span className="text-slate-400 font-medium">Registry</span>
+              </span>
             </div>
-            <span className="font-bold text-slate-900 dark:text-white">
-              Job<span className="text-blue-600">Me</span>
-            </span>
           </div>
         </div>
       </header>
 
-      {/* Form */}
-      <main className="max-w-3xl mx-auto px-6 py-8">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
-            Post a New Job
+      {/* Main Form Area */}
+      <main className="max-w-3xl mx-auto px-6 py-12">
+        <div className="mb-12 space-y-2">
+          <div className="flex items-center gap-2 text-blue-600">
+            <Zap size={14} />
+            <span className="text-[10px] font-black uppercase tracking-[0.3em]">New Deployment</span>
+          </div>
+          <h1 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">
+            Post New Position
           </h1>
-          <p className="text-sm text-slate-500 dark:text-zinc-400 mt-1">
-            Fill in the details below. Your job will be reviewed by admin before going live.
+          <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">
+            Authorization: <span className="text-blue-600">Admin Verification Required</span>
           </p>
         </div>
 
-        <div className="space-y-5">
-
-          {/* Title + Company */}
-          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 p-6 space-y-4">
-            <h2 className="text-sm font-semibold text-slate-700 dark:text-zinc-300 flex items-center gap-2">
-              <Briefcase className="h-4 w-4 text-blue-600" /> Job Details
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1.5 block">
-                  Job Title *
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Frontend Developer"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder:text-slate-400"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1.5 block">
-                  Company Name *
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Acme Corp"
-                  value={company}
-                  onChange={(e) => setCompany(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder:text-slate-400"
-                />
+        <div className="space-y-8">
+          {/* Section 01: Core Info */}
+          <section className="space-y-4">
+            <div className="flex items-center gap-3 mb-2">
+              <span className="text-[10px] font-mono bg-slate-100 dark:bg-zinc-800 px-2 py-0.5 rounded text-slate-500">01</span>
+              <h2 className="text-[11px] font-black uppercase tracking-widest text-slate-400">Position Identity</h2>
+            </div>
+            <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-6 rounded-sm shadow-sm space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase tracking-tight text-slate-500">Job Title *</label>
+                  <input
+                    type="text"
+                    placeholder="E.G. SYSTEMS ENGINEER"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-sm px-4 py-3 text-sm font-bold placeholder:text-slate-300 focus:ring-2 focus:ring-blue-600 outline-none transition-all"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase tracking-tight text-slate-500">Company Entity *</label>
+                  <input
+                    type="text"
+                    placeholder="ENTITY NAME"
+                    value={company}
+                    onChange={(e) => setCompany(e.target.value)}
+                    className="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-sm px-4 py-3 text-sm font-bold placeholder:text-slate-300 focus:ring-2 focus:ring-blue-600 outline-none transition-all"
+                  />
+                </div>
               </div>
             </div>
-          </div>
+          </section>
 
-          {/* Location + Type + Salary */}
-          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 p-6 space-y-4">
-            <h2 className="text-sm font-semibold text-slate-700 dark:text-zinc-300 flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-blue-600" /> Location & Type
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1.5 block">
-                  Location *
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Chennai, Tamil Nadu"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder:text-slate-400"
-                />
+          {/* Section 02: Logistics */}
+          <section className="space-y-4">
+            <div className="flex items-center gap-3 mb-2">
+              <span className="text-[10px] font-mono bg-slate-100 dark:bg-zinc-800 px-2 py-0.5 rounded text-slate-500">02</span>
+              <h2 className="text-[11px] font-black uppercase tracking-widest text-slate-400">Logistics & Compensation</h2>
+            </div>
+            <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-6 rounded-sm shadow-sm space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase tracking-tight text-slate-500">Geographic Location *</label>
+                  <div className="relative">
+                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                    <input
+                      type="text"
+                      placeholder="CITY, COUNTRY"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      className="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-sm pl-10 pr-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-blue-600 transition-all"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase tracking-tight text-slate-500">Contract Type</label>
+                  <select
+                    value={jobType}
+                    onChange={(e) => setJobType(e.target.value)}
+                    className="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-sm px-4 py-3 text-sm font-bold uppercase tracking-tighter outline-none focus:ring-2 focus:ring-blue-600 transition-all cursor-pointer"
+                  >
+                    {JOB_TYPES.map((t) => (
+                      <option key={t} value={t}>{t.replace('-', ' ')}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
-              <div>
-                <label className="text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1.5 block">
-                  Job Type
-                </label>
-                <select
-                  value={jobType}
-                  onChange={(e) => setJobType(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500 transition-all capitalize"
+
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black uppercase tracking-tight text-slate-500">Annual Salary Range (USD)</label>
+                <div className="flex items-center gap-4">
+                  <div className="relative flex-1">
+                    <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                    <input
+                      type="number"
+                      placeholder="MIN"
+                      value={salaryMin}
+                      onChange={(e) => setSalaryMin(e.target.value)}
+                      className="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-sm pl-10 pr-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-blue-600 transition-all"
+                    />
+                  </div>
+                  <div className="h-[1px] w-4 bg-slate-300" />
+                  <div className="relative flex-1">
+                    <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                    <input
+                      type="number"
+                      placeholder="MAX"
+                      value={salaryMax}
+                      onChange={(e) => setSalaryMax(e.target.value)}
+                      className="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-sm pl-10 pr-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-blue-600 transition-all"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Section 03: Skills */}
+          <section className="space-y-4">
+            <div className="flex items-center gap-3 mb-2">
+              <span className="text-[10px] font-mono bg-slate-100 dark:bg-zinc-800 px-2 py-0.5 rounded text-slate-500">03</span>
+              <h2 className="text-[11px] font-black uppercase tracking-widest text-slate-400">Technical Requirements</h2>
+            </div>
+            <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-6 rounded-sm shadow-sm space-y-4">
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Tag className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                  <input
+                    type="text"
+                    placeholder="ENTER SKILL TAG..."
+                    value={skillInput}
+                    onChange={(e) => setSkillInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && addSkill()}
+                    className="w-full bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-sm pl-10 pr-4 py-3 text-sm font-bold uppercase placeholder:text-slate-400 outline-none focus:ring-1 focus:ring-blue-600 transition-all"
+                  />
+                </div>
+                <button
+                  onClick={addSkill}
+                  className="px-6 bg-slate-900 dark:bg-blue-600 text-white rounded-sm text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all active:scale-95"
                 >
-                  {JOB_TYPES.map((t) => (
-                    <option key={t} value={t} className="capitalize">{t}</option>
-                  ))}
-                </select>
+                  Append
+                </button>
               </div>
-            </div>
-
-            {/* Salary */}
-            <div>
-              <label className="text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1.5 flex items-center gap-1.5">
-                <DollarSign className="h-3.5 w-3.5" /> Salary Range (Optional)
-              </label>
-              <div className="flex items-center gap-3">
-                <input
-                  type="number"
-                  placeholder="Min"
-                  value={salaryMin}
-                  onChange={(e) => setSalaryMin(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400"
-                />
-                <span className="text-slate-400 text-sm shrink-0">to</span>
-                <input
-                  type="number"
-                  placeholder="Max"
-                  value={salaryMax}
-                  onChange={(e) => setSalaryMax(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Skills */}
-          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 p-6 space-y-4">
-            <h2 className="text-sm font-semibold text-slate-700 dark:text-zinc-300 flex items-center gap-2">
-              <Tag className="h-4 w-4 text-blue-600" /> Required Skills
-            </h2>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="e.g. React, TypeScript"
-                value={skillInput}
-                onChange={(e) => setSkillInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && addSkill()}
-                className="flex-1 px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400"
-              />
-              <button
-                onClick={addSkill}
-                className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5"
-              >
-                <Plus className="h-4 w-4" /> Add
-              </button>
-            </div>
-            {skills.length > 0 && (
-              <div className="flex flex-wrap gap-2">
+              
+              <div className="flex flex-wrap gap-2 min-h-[40px] p-2 bg-slate-50 dark:bg-zinc-950 rounded-sm border border-dashed border-slate-200 dark:border-zinc-800">
+                {skills.length === 0 && <span className="text-[10px] font-bold text-slate-300 uppercase p-1">No skills defined</span>}
                 {skills.map((skill) => (
                   <span
                     key={skill}
-                    className="flex items-center gap-1.5 px-3 py-1 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 text-sm rounded-full border border-blue-200 dark:border-blue-800"
+                    className="flex items-center gap-2 px-3 py-1 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-[10px] font-black uppercase tracking-tighter rounded-sm"
                   >
                     {skill}
-                    <button onClick={() => removeSkill(skill)}>
-                      <X className="h-3 w-3 hover:text-blue-900" />
+                    <button onClick={() => removeSkill(skill)} className="text-rose-500 hover:text-rose-700 transition-colors">
+                      <X size={12} strokeWidth={3} />
                     </button>
                   </span>
                 ))}
               </div>
-            )}
-          </div>
+            </div>
+          </section>
 
-          {/* Description */}
-          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 p-6 space-y-3">
-            <h2 className="text-sm font-semibold text-slate-700 dark:text-zinc-300">
-              Job Description *
-            </h2>
-            <textarea
-              placeholder="Describe the role, responsibilities, requirements..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={6}
-              className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400 resize-none"
-            />
-          </div>
+          {/* Section 04: Description */}
+          <section className="space-y-4">
+            <div className="flex items-center gap-3 mb-2">
+              <span className="text-[10px] font-mono bg-slate-100 dark:bg-zinc-800 px-2 py-0.5 rounded text-slate-500">04</span>
+              <h2 className="text-[11px] font-black uppercase tracking-widest text-slate-400">Position Narrative</h2>
+            </div>
+            <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-6 rounded-sm shadow-sm">
+              <textarea
+                placeholder="DETAILED ROLE SPECIFICATIONS..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={8}
+                className="w-full bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-sm px-4 py-3 text-sm font-medium leading-relaxed outline-none focus:ring-2 focus:ring-blue-600 transition-all resize-none"
+              />
+            </div>
+          </section>
 
           {error && (
-            <p className="text-sm text-red-500 bg-red-50 dark:bg-red-950/30 px-4 py-3 rounded-lg">
-              {error}
-            </p>
+            <div className="bg-rose-500/10 border border-rose-500/50 p-4 flex items-center gap-3">
+              <X className="text-rose-500" size={16} />
+              <p className="text-[11px] font-black text-rose-600 uppercase tracking-widest">{error}</p>
+            </div>
           )}
 
-          {/* Submit */}
-          <div className="flex gap-3">
-            <Link
-              href="/recruiter/dashboard"
-              className="flex-1 py-2.5 text-center border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-400 rounded-lg text-sm font-medium hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
-            >
-              Cancel
-            </Link>
+          {/* Submission Controls */}
+          <div className="pt-6 flex flex-col md:flex-row gap-4">
             <button
               onClick={handlePost}
               disabled={isPending}
-              className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-lg text-sm font-semibold transition-colors"
+              className="flex-1 h-14 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-sm text-xs font-black uppercase tracking-[0.2em] transition-all shadow-lg shadow-blue-600/20 active:scale-[0.98] flex items-center justify-center gap-2"
             >
-              {isPending ? 'Posting...' : 'Post Job'}
+              {isPending ? 'Processing Transmission...' : 'Execute Deployment'}
+              {!isPending && <Zap size={14} fill="currentColor" />}
             </button>
+            <Link
+              href="/recruiter/jobs"
+              className="flex-1 h-14 flex items-center justify-center border border-slate-200 dark:border-zinc-800 text-slate-500 hover:bg-slate-100 dark:hover:bg-zinc-900 rounded-sm text-xs font-black uppercase tracking-[0.2em] transition-all"
+            >
+              Abort Entry
+            </Link>
           </div>
 
-          <p className="text-xs text-center text-slate-400 dark:text-zinc-500">
-            ⏳ Your job will be reviewed by admin before going live.
-          </p>
+          <div className="flex items-center justify-center gap-2 py-4">
+            <Lock size={12} className="text-slate-300" />
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest text-center">
+              All submissions are subject to manual review by JobMe security protocols.
+            </p>
+          </div>
         </div>
       </main>
     </div>
