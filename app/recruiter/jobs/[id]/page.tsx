@@ -21,6 +21,12 @@ interface Applicant {
   profiles: {
     full_name: string | null;
     email: string;
+    phone?: string | null;
+    bio?: string | null;
+    skills?: string[] | null;
+    experience?: string | null;
+    education?: string | null;
+    resume_url?: string | null;
   };
 }
 
@@ -75,7 +81,7 @@ export default function ViewApplicantsPage() {
         .from('applications')
         .select(`
           id, status, created_at, cover_letter,
-          profiles ( full_name, email )
+          profiles ( full_name, email, phone, bio, skills, experience, education, resume_url )
         `)
         .eq('job_id', id)
         .order('created_at', { ascending: false });
@@ -181,25 +187,76 @@ export default function ViewApplicantsPage() {
                 {/* Applicant Bio */}
                 <div className="flex-1 space-y-4">
                   <div className="flex items-start gap-4">
-                    <div className="h-12 w-12 bg-slate-100 dark:bg-zinc-800 rounded-sm flex items-center justify-center border border-slate-200 dark:border-zinc-700">
+                    <div className="h-12 w-12 bg-slate-100 dark:bg-zinc-800 rounded-sm flex items-center justify-center border border-slate-200 dark:border-zinc-700 shrink-0">
                       <User className="h-6 w-6 text-slate-400" />
                     </div>
-                    <div>
-                      <div className="flex items-center gap-3 mb-1">
-                        <h3 className="font-black text-slate-900 dark:text-white uppercase tracking-tight text-lg leading-none">
-                          {app.profiles.full_name ?? 'Anonymous_User'}
-                        </h3>
-                        <StatusBadge status={app.status} />
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-3">
+                          <h3 className="font-black text-slate-900 dark:text-white uppercase tracking-tight text-lg leading-none">
+                            {app.profiles.full_name ?? 'Anonymous_User'}
+                          </h3>
+                          <StatusBadge status={app.status} />
+                        </div>
+                        {app.profiles.resume_url && (
+                          <a
+                            href={app.profiles.resume_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1.5 px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest rounded-sm transition-colors"
+                          >
+                            View Resume <ExternalLink size={12} />
+                          </a>
+                        )}
                       </div>
-                      <div className="flex items-center gap-4 text-[11px] font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-tight">
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-tight mt-2">
                         <span className="flex items-center gap-1.5"><Mail size={12} className="text-blue-500"/> {app.profiles.email}</span>
+                        {app.profiles.phone && (
+                          <span className="flex items-center gap-1.5">📞 {app.profiles.phone}</span>
+                        )}
                         <span className="flex items-center gap-1.5"><Calendar size={12}/> {new Date(app.created_at).toLocaleDateString()}</span>
                       </div>
                     </div>
                   </div>
 
+                  {app.profiles.bio && (
+                    <p className="text-sm text-slate-600 dark:text-zinc-400 font-medium">
+                      {app.profiles.bio}
+                    </p>
+                  )}
+
+                  {(app.profiles.experience || app.profiles.education) && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {app.profiles.experience && (
+                        <div className="bg-slate-50 dark:bg-zinc-950/50 p-3 rounded-sm border border-slate-100 dark:border-zinc-800">
+                          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Experience</p>
+                          <p className="text-xs text-slate-700 dark:text-zinc-300 font-medium">{app.profiles.experience}</p>
+                        </div>
+                      )}
+                      {app.profiles.education && (
+                        <div className="bg-slate-50 dark:bg-zinc-950/50 p-3 rounded-sm border border-slate-100 dark:border-zinc-800">
+                          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Education</p>
+                          <p className="text-xs text-slate-700 dark:text-zinc-300 font-medium">{app.profiles.education}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {app.profiles.skills && app.profiles.skills.length > 0 && (
+                    <div>
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Technical Skills</p>
+                      <div className="flex flex-wrap gap-2">
+                        {app.profiles.skills.map((skill, i) => (
+                          <span key={i} className="px-2 py-1 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 text-[10px] font-bold uppercase tracking-wider rounded-sm">
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {app.cover_letter && (
-                    <div className="bg-slate-50 dark:bg-zinc-950 border-l-2 border-blue-600 p-4 rounded-sm">
+                    <div className="bg-slate-50 dark:bg-zinc-950 border-l-2 border-blue-600 p-4 rounded-sm mt-4">
                       <div className="flex items-center gap-2 mb-2">
                         <FileText size={10} className="text-blue-600" />
                         <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Statement of Intent</span>
