@@ -10,7 +10,8 @@ import {
   Shield, 
   LogOut, 
   ChevronRight,
-  Activity
+  Activity,
+  Send
 } from 'lucide-react';
 import { createBrowserClient } from '@supabase/ssr';
 import { ThemeToggle } from './ThemeToggle';
@@ -20,6 +21,7 @@ const NAV_ITEMS = [
   { label: 'Overview',   href: '/dashboard',         icon: LayoutDashboard },
   { label: 'User Index', href: '/dashboard/users',    icon: Users           },
   { label: 'Job Registry', href: '/dashboard/jobs',     icon: Briefcase       },
+  { label: 'Referrals',  href: '/dashboard/referrals',icon: Send            },
   { label: 'Analytics',  href: '/dashboard/reports',  icon: BarChart2, soon: true },
 ];
 

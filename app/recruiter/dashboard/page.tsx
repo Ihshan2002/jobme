@@ -183,7 +183,7 @@ export default function RecruiterDashboard() {
           <h2 className="text-[11px] font-bold text-slate-400 dark:text-zinc-600 uppercase tracking-[0.25em]">
             Registry Access
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <Link
               href="/recruiter/jobs"
               className="group flex items-center justify-between p-4 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-md hover:border-blue-500 hover:bg-blue-50/30 dark:hover:bg-blue-500/5 transition-all"
@@ -194,7 +194,7 @@ export default function RecruiterDashboard() {
                 </div>
                 <div>
                   <p className="text-[13px] font-bold text-slate-900 dark:text-white uppercase tracking-tight">Active Inventory</p>
-                  <p className="text-[11px] text-slate-500 dark:text-zinc-500 font-medium uppercase">Modify and monitor current listings</p>
+                  <p className="text-[11px] text-slate-500 dark:text-zinc-500 font-medium uppercase">Modify current listings</p>
                 </div>
               </div>
               <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-blue-500 transition-colors" />
@@ -210,10 +210,26 @@ export default function RecruiterDashboard() {
                 </div>
                 <div>
                   <p className="text-[13px] font-bold text-slate-900 dark:text-white uppercase tracking-tight">Expand Portfolio</p>
-                  <p className="text-[11px] text-slate-500 dark:text-zinc-500 font-medium uppercase">Initiate new talent acquisition</p>
+                  <p className="text-[11px] text-slate-500 dark:text-zinc-500 font-medium uppercase">Initiate talent acquisition</p>
                 </div>
               </div>
               <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-emerald-500 transition-colors" />
+            </Link>
+
+            <Link
+              href="/recruiter/referrals"
+              className="group flex items-center justify-between p-4 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-md hover:border-purple-500 hover:bg-purple-50/30 dark:hover:bg-purple-500/5 transition-all"
+            >
+              <div className="flex items-center gap-4">
+                <div className="h-10 w-10 flex items-center justify-center bg-slate-100 dark:bg-zinc-800 rounded border border-slate-200 dark:border-zinc-800 group-hover:bg-purple-600 group-hover:border-purple-600 transition-all">
+                  <FileText className="h-5 w-5 text-slate-600 dark:text-zinc-400 group-hover:text-white" />
+                </div>
+                <div>
+                  <p className="text-[13px] font-bold text-slate-900 dark:text-white uppercase tracking-tight">Referrals Inbox</p>
+                  <p className="text-[11px] text-slate-500 dark:text-zinc-500 font-medium uppercase">Review routed candidates</p>
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-purple-500 transition-colors" />
             </Link>
           </div>
         </div>

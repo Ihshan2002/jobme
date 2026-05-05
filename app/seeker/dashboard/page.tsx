@@ -14,7 +14,8 @@ import {
   User,
   ChevronRight,
   Target,
-  Sparkles
+  Sparkles,
+  MessageSquare
 } from 'lucide-react';
 import { ThemeToggle } from '@/components/layout/ThemeToggle';
 
@@ -161,11 +162,12 @@ export default function SeekerDashboard() {
           <h2 className="text-[11px] font-bold text-slate-400 dark:text-zinc-600 uppercase tracking-[0.25em] px-1">
             System Shortcuts
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               { label: 'Search Registry', sub: 'Find new listings', icon: Search, href: '/seeker/jobs', activeColor: 'hover:border-blue-500 hover:bg-blue-50/30' },
               { label: 'Submission Log', sub: 'Track your history', icon: Briefcase, href: '/seeker/applications', activeColor: 'hover:border-emerald-500 hover:bg-emerald-50/30' },
               { label: 'Saved Archive', sub: 'Review bookmarks', icon: BookmarkCheck, href: '/seeker/saved', activeColor: 'hover:border-amber-500 hover:bg-amber-50/30' },
+              { label: 'Messages', sub: 'Inbox & notifications', icon: MessageSquare, href: '/seeker/messages', activeColor: 'hover:border-purple-500 hover:bg-purple-50/30' },
             ].map((action, idx) => (
               <Link
                 key={idx}
