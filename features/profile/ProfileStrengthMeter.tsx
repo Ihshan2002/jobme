@@ -10,13 +10,15 @@ export interface ProfileData {
   experience?: string | null;
   education?: string | null;
   resume_url?: string | null;
+  avatar_url?: string | null;
 }
 
 export function ProfileStrengthMeter({ profile }: { profile: ProfileData }) {
   const points = [
-    { key: 'full_name', label: 'Full Name', value: 20, done: !!profile.full_name },
+    { key: 'full_name', label: 'Full Name', value: 15, done: !!profile.full_name },
+    { key: 'avatar_url', label: 'Profile Photo', value: 10, done: !!profile.avatar_url },
     { key: 'bio', label: 'Professional Bio', value: 15, done: !!profile.bio },
-    { key: 'skills', label: 'Skills (Min 3)', value: 20, done: !!(profile.skills && profile.skills.length >= 3) },
+    { key: 'skills', label: 'Skills (Min 3)', value: 15, done: !!(profile.skills && profile.skills.length >= 3) },
     { key: 'experience', label: 'Work Experience', value: 15, done: !!profile.experience },
     { key: 'education', label: 'Education', value: 15, done: !!profile.education },
     { key: 'resume_url', label: 'Resume / CV Uploaded', value: 15, done: !!profile.resume_url },

@@ -33,6 +33,7 @@ interface Profile {
   experience?: string | null;
   education?: string | null;
   resume_url?: string | null;
+  avatar_url?: string | null;
 }
 
 interface Stats {
@@ -139,18 +140,29 @@ export default function SeekerDashboard() {
       <main className="max-w-6xl mx-auto px-6 py-10">
 
         {/* Dashboard Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 pb-8 border-b border-slate-200 dark:border-zinc-900">
-          <div>
-            <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 mb-1">
-              <Target size={14} />
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Career Overview</span>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 pb-8 border-b border-slate-200 dark:border-zinc-900">
+          <div className="flex items-center gap-5">
+            <div className="w-20 h-20 rounded-full border-2 border-white dark:border-zinc-800 shadow-xl overflow-hidden bg-slate-100 dark:bg-zinc-800 shrink-0">
+              {profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <User size={32} className="text-slate-300 dark:text-zinc-600" />
+                </div>
+              )}
             </div>
-            <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">
-              Hello, {profile?.full_name?.split(' ')[0] ?? 'Explorer'}
-            </h1>
-            <p className="text-sm text-slate-500 dark:text-zinc-400 font-medium mt-1">
-              Candidate ID: <span className="text-slate-900 dark:text-slate-200 font-bold tracking-tight">{profile?.email}</span>
-            </p>
+            <div>
+              <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 mb-1">
+                <Target size={14} />
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Career Overview</span>
+              </div>
+              <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">
+                Hello, {profile?.full_name?.split(' ')[0] ?? 'Explorer'}
+              </h1>
+              <p className="text-sm text-slate-500 dark:text-zinc-400 font-medium mt-1">
+                Candidate ID: <span className="text-slate-900 dark:text-slate-200 font-bold tracking-tight">{profile?.email}</span>
+              </p>
+            </div>
           </div>
 
           <Link

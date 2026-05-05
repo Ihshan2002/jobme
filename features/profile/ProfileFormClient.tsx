@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { updateProfile } from './actions';
 import { toast } from 'sonner';
-import { FileUp, Save, CheckCircle2, User, Phone, BookOpen, Briefcase, FileText } from 'lucide-react';
+import { FileUp, Save, CheckCircle2, User, Phone, BookOpen, Briefcase, FileText, Camera, Loader2 } from 'lucide-react';
 import { createBrowserClient } from '@supabase/ssr';
 
 export function ProfileFormClient({ initialProfile }: { initialProfile: any }) {
@@ -14,11 +14,13 @@ export function ProfileFormClient({ initialProfile }: { initialProfile: any }) {
     skills: initialProfile?.skills ? initialProfile.skills.join(', ') : '',
     experience: initialProfile?.experience || '',
     education: initialProfile?.education || '',
-    resume_url: initialProfile?.resume_url || ''
+    resume_url: initialProfile?.resume_url || '',
+    avatar_url: initialProfile?.avatar_url || ''
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isAvatarUploading, setIsAvatarUploading] = useState(false);
   
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -66,6 +68,47 @@ export function ProfileFormClient({ initialProfile }: { initialProfile: any }) {
     }
   };
 
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    if (!file.type.startsWith('image/')) {
+      toast.error('Only image files are allowed.');
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Image size must be under 2MB.');
+      return;
+    }
+
+    setIsAvatarUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${initialProfile.id}-avatar.${fileExt}`;
+      const filePath = `public/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      setFormData(prev => ({ ...prev, avatar_url: publicUrl }));
+      
+      // Auto save after upload
+      await updateProfile({ avatar_url: publicUrl });
+      toast.success('Profile photo updated!');
+    } catch (error: any) {
+      toast.error(error.message || 'Error uploading photo.');
+    } finally {
+      setIsAvatarUploading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -92,6 +135,37 @@ export function ProfileFormClient({ initialProfile }: { initialProfile: any }) {
 
   return (
     <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg p-6 shadow-sm">
+      {/* Avatar Section */}
+      <div className="mb-10 flex flex-col items-center">
+        <div className="relative group">
+          <div className="w-24 h-24 rounded-full border-2 border-slate-100 dark:border-zinc-800 overflow-hidden bg-slate-50 dark:bg-zinc-950 flex items-center justify-center relative">
+            {formData.avatar_url ? (
+              <img src={formData.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+            ) : (
+              <User size={40} className="text-slate-300 dark:text-zinc-700" />
+            )}
+            
+            {isAvatarUploading && (
+              <div className="absolute inset-0 bg-white/60 dark:bg-zinc-900/60 flex items-center justify-center">
+                <Loader2 size={24} className="text-blue-600 animate-spin" />
+              </div>
+            )}
+          </div>
+          
+          <label className="absolute bottom-0 right-0 p-1.5 bg-blue-600 text-white rounded-full cursor-pointer shadow-lg hover:bg-blue-700 transition-colors border-2 border-white dark:border-zinc-900">
+            <Camera size={14} />
+            <input 
+              type="file" 
+              accept="image/*" 
+              className="hidden" 
+              onChange={handleAvatarUpload}
+              disabled={isAvatarUploading}
+            />
+          </label>
+        </div>
+        <p className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mt-3">Profile Photo</p>
+      </div>
+
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">

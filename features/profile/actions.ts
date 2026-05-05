@@ -42,6 +42,7 @@ export async function updateProfile(data: {
   education?: string;
   phone?: string;
   resume_url?: string;
+  avatar_url?: string;
 }) {
   const cookieStore = await cookies();
   const supabase = createServerClient(

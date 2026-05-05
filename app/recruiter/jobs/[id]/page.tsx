@@ -29,6 +29,7 @@ interface Applicant {
     experience?: string | null;
     education?: string | null;
     resume_url?: string | null;
+    avatar_url?: string | null;
   };
 }
 
@@ -86,7 +87,7 @@ export default function ViewApplicantsPage() {
         .from('applications')
         .select(`
           id, status, created_at, cover_letter, seeker_id,
-          profiles ( full_name, email, phone, bio, skills, experience, education, resume_url )
+          profiles ( full_name, email, phone, bio, skills, experience, education, resume_url, avatar_url )
         `)
         .eq('job_id', id)
         .order('created_at', { ascending: false });
@@ -192,8 +193,12 @@ export default function ViewApplicantsPage() {
                 {/* Applicant Bio */}
                 <div className="flex-1 space-y-4">
                   <div className="flex items-start gap-4">
-                    <div className="h-12 w-12 bg-slate-100 dark:bg-zinc-800 rounded-sm flex items-center justify-center border border-slate-200 dark:border-zinc-700 shrink-0">
-                      <User className="h-6 w-6 text-slate-400" />
+                    <div className="h-12 w-12 bg-slate-100 dark:bg-zinc-800 rounded-sm flex items-center justify-center border border-slate-200 dark:border-zinc-700 shrink-0 overflow-hidden">
+                      {app.profiles.avatar_url ? (
+                        <img src={app.profiles.avatar_url} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <User className="h-6 w-6 text-slate-400" />
+                      )}
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
