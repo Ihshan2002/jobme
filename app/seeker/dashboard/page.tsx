@@ -15,7 +15,9 @@ import {
   ChevronRight,
   Target,
   Sparkles,
-  MessageSquare
+  MessageSquare,
+  CalendarClock,
+  ExternalLink
 } from 'lucide-react';
 import { ThemeToggle } from '@/components/layout/ThemeToggle';
 import { NotificationBell } from '@/components/ui/NotificationBell';
@@ -38,11 +40,21 @@ interface Stats {
   saved: number;
 }
 
+interface Interview {
+  id: string;
+  job_title: string;
+  company_name: string;
+  scheduled_at: string;
+  meeting_link: string | null;
+  status: string;
+}
+
 export default function SeekerDashboard() {
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [stats, setStats]     = useState<Stats>({ applied: 0, saved: 0 });
+  const [interviews, setInterviews] = useState<Interview[]>([]);
   const [loading, setLoading] = useState(true);
 
   const supabase = useMemo(() => createBrowserClient(
@@ -65,12 +77,14 @@ export default function SeekerDashboard() {
       if (prof?.role !== 'seeker') { router.push('/auth/login'); return; }
       setProfile(prof);
 
-      const [{ count: applied }, { count: saved }] = await Promise.all([
+      const [{ count: applied }, { count: saved }, { data: interviewsData }] = await Promise.all([
         supabase.from('applications').select('*', { count: 'exact', head: true }).eq('seeker_id', user.id),
         supabase.from('saved_jobs').select('*', { count: 'exact', head: true }).eq('seeker_id', user.id),
+        supabase.from('interviews').select('*').eq('seeker_id', user.id).eq('status', 'scheduled').gte('scheduled_at', new Date().toISOString()).order('scheduled_at', { ascending: true }).limit(3)
       ]);
 
       setStats({ applied: applied ?? 0, saved: saved ?? 0 });
+      setInterviews((interviewsData as unknown as Interview[]) || []);
       setLoading(false);
     }
     load();
@@ -152,6 +166,48 @@ export default function SeekerDashboard() {
         <div className="mb-10">
           {profile && <ProfileStrengthMeter profile={profile} />}
         </div>
+
+        {/* Upcoming Interviews */}
+        {interviews.length > 0 && (
+          <div className="mb-10">
+            <h2 className="text-[11px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-[0.25em] mb-4 flex items-center gap-2">
+              <CalendarClock size={14} /> Upcoming Interviews
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {interviews.map((interview) => (
+                <div key={interview.id} className="bg-white dark:bg-zinc-900 border border-blue-200 dark:border-blue-900/50 p-5 rounded shadow-sm shadow-blue-500/5 relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-1 h-full bg-blue-500" />
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">{interview.company_name}</p>
+                  <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight leading-tight mb-3">
+                    {interview.job_title}
+                  </h3>
+                  <div className="bg-slate-50 dark:bg-zinc-950 rounded p-3 mb-4 border border-slate-100 dark:border-zinc-800">
+                    <p className="text-xs font-bold text-slate-700 dark:text-zinc-300">
+                      {new Date(interview.scheduled_at).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                    </p>
+                    <p className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mt-1">
+                      {new Date(interview.scheduled_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                    </p>
+                  </div>
+                  {interview.meeting_link ? (
+                    <a
+                      href={interview.meeting_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black uppercase tracking-widest px-4 py-2.5 rounded transition-all"
+                    >
+                      Join Meeting <ExternalLink size={12} />
+                    </a>
+                  ) : (
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center py-2 border border-dashed border-slate-200 dark:border-zinc-800 rounded">
+                      Link pending
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">

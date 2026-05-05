@@ -9,15 +9,17 @@ import Link from 'next/link';
 import {
   Shield, ArrowLeft, User, CheckCircle,
   XCircle, Star, Mail, Calendar,
-  FileText, ExternalLink, Hash, ChevronRight
+  FileText, ExternalLink, Hash, ChevronRight, CalendarClock
 } from 'lucide-react';
 import { updateApplicationStatus } from '@/features/jobs/actions';
+import { ScheduleInterviewForm } from '@/components/recruiter/ScheduleInterviewForm';
 
 interface Applicant {
   id: string;
   status: 'applied' | 'shortlisted' | 'rejected' | 'accepted';
   created_at: string;
   cover_letter: string | null;
+  seeker_id: string; // Add this
   profiles: {
     full_name: string | null;
     email: string;
@@ -56,6 +58,8 @@ export default function ViewApplicantsPage() {
   const [job, setJob] = useState<Job | null>(null);
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [loading, setLoading] = useState(true);
+  const [schedulingAppId, setSchedulingAppId] = useState<string | null>(null);
+  const [recruiterId, setRecruiterId] = useState<string>('');
 
   const supabase = useMemo(() => createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -66,6 +70,7 @@ export default function ViewApplicantsPage() {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { router.push('/auth/login'); return; }
+      setRecruiterId(user.id);
 
       const { data: jobData } = await supabase
         .from('jobs')
@@ -80,7 +85,7 @@ export default function ViewApplicantsPage() {
       const { data: appData } = await supabase
         .from('applications')
         .select(`
-          id, status, created_at, cover_letter,
+          id, status, created_at, cover_letter, seeker_id,
           profiles ( full_name, email, phone, bio, skills, experience, education, resume_url )
         `)
         .eq('job_id', id)
@@ -273,6 +278,13 @@ export default function ViewApplicantsPage() {
                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Update Status</p>
                   
                   <button
+                    onClick={() => setSchedulingAppId(app.id)}
+                    className="flex items-center justify-between px-3 py-2 text-[10px] font-black uppercase tracking-widest border border-blue-500/30 text-blue-600 bg-blue-500/10 hover:bg-blue-600 hover:text-white transition-all mb-2 shadow-sm shadow-blue-500/20"
+                  >
+                    Schedule <CalendarClock size={12} />
+                  </button>
+
+                  <button
                     onClick={() => updateStatus(app.id, 'shortlisted')}
                     disabled={app.status === 'shortlisted'}
                     className={`flex items-center justify-between px-3 py-2 text-[10px] font-black uppercase tracking-widest border transition-all ${
@@ -308,6 +320,22 @@ export default function ViewApplicantsPage() {
                     Reject <XCircle size={12} />
                   </button>
                 </div>
+                
+                {/* Inline Scheduling Form */}
+                {schedulingAppId === app.id && job && (
+                  <ScheduleInterviewForm
+                    appId={app.id}
+                    seekerId={app.seeker_id}
+                    jobTitle={job.title}
+                    companyName={job.company_name}
+                    recruiterId={recruiterId}
+                    onCancel={() => setSchedulingAppId(null)}
+                    onSuccess={() => {
+                      setSchedulingAppId(null);
+                      setApplicants(applicants.map(a => a.id === app.id ? { ...a, status: 'shortlisted' } : a));
+                    }}
+                  />
+                )}
               </div>
             ))}
           </div>
