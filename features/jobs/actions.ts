@@ -33,3 +33,61 @@ export async function deleteJob(
   revalidatePath('/dashboard/jobs');
   return { success: true };
 }
+
+export async function updateApplicationStatus(
+  appId: string,
+  status: 'shortlisted' | 'accepted' | 'rejected',
+  jobTitle: string,
+  companyName: string
+) {
+  // 1. Update application status
+  const { data: application, error: updateError } = await supabaseAdmin
+    .from('applications')
+    .update({ status, updated_at: new Date().toISOString() })
+    .eq('id', appId)
+    .select('seeker_id')
+    .single();
+
+  if (updateError) {
+    return { success: false, error: updateError.message };
+  }
+
+  // 2. Insert notification
+  const seekerId = application?.seeker_id;
+
+  if (seekerId) {
+    let title = '';
+    let message = '';
+    let type = 'info';
+
+    switch (status) {
+      case 'accepted':
+        title = `Application Accepted: ${companyName}`;
+        message = `Congratulations! Your application for the ${jobTitle} role has been accepted by ${companyName}. They will contact you shortly with the next steps.`;
+        type = 'success';
+        break;
+      case 'rejected':
+        title = `Application Update: ${companyName}`;
+        message = `Unfortunately, your application for the ${jobTitle} role at ${companyName} was not selected to move forward at this time.`;
+        type = 'warning';
+        break;
+      case 'shortlisted':
+        title = `Application Shortlisted: ${companyName}`;
+        message = `Great news! Your application for the ${jobTitle} role at ${companyName} has been shortlisted.`;
+        type = 'success';
+        break;
+    }
+
+    await supabaseAdmin
+      .from('notifications')
+      .insert({
+        user_id: seekerId,
+        title,
+        message,
+        type
+      });
+  }
+
+  revalidatePath('/recruiter/jobs');
+  return { success: true };
+}

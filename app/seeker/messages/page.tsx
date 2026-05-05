@@ -37,7 +37,8 @@ export default function SeekerMessagesPage() {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error(error);
+        console.error("Fetch Error:", error);
+        toast.error(`Error loading messages: ${error.message}. Please check RLS policies!`);
       } else {
         setNotifications(data || []);
       }

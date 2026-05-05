@@ -11,6 +11,7 @@ import {
   XCircle, Star, Mail, Calendar,
   FileText, ExternalLink, Hash, ChevronRight
 } from 'lucide-react';
+import { updateApplicationStatus } from '@/features/jobs/actions';
 
 interface Applicant {
   id: string;
@@ -86,14 +87,19 @@ export default function ViewApplicantsPage() {
   }, [id, router, supabase]);
 
   async function updateStatus(appId: string, newStatus: Applicant['status']) {
-    await supabase
-      .from('applications')
-      .update({ status: newStatus, updated_at: new Date().toISOString() })
-      .eq('id', appId);
-
-    setApplicants(applicants.map((a) =>
-      a.id === appId ? { ...a, status: newStatus } : a
-    ));
+    if (!job) return;
+    
+    // Call server action to update DB and insert notification
+    const res = await updateApplicationStatus(appId, newStatus, job.title, job.company_name);
+    
+    if (res.success) {
+      // Optimistically update local state
+      setApplicants(applicants.map((a) =>
+        a.id === appId ? { ...a, status: newStatus } : a
+      ));
+    } else {
+      console.error("Failed to update status:", res.error);
+    }
   }
 
   if (loading) {

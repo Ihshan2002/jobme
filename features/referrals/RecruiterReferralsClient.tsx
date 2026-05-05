@@ -51,9 +51,19 @@ export function RecruiterReferralsClient({ referrals }: { referrals: any[] }) {
                   <div>
                     <h3 className="font-bold text-slate-900 dark:text-white text-[15px]">{seeker?.full_name || 'Candidate Name'}</h3>
                     <p className="text-[11px] text-slate-500">{seeker?.email || 'No email provided'}</p>
+                    {seeker?.resume_url && (
+                      <a 
+                        href={seeker.resume_url} 
+                        target="_blank" 
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 mt-1 text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 uppercase tracking-widest transition-colors"
+                      >
+                        <FileText size={10} /> View Resume
+                      </a>
+                    )}
                   </div>
                 </div>
-                <span className={`px-2 py-1 rounded text-[9px] font-black uppercase tracking-widest border ${
+                <span className={`px-2 py-1 rounded text-[9px] font-black uppercase tracking-widest border h-fit ${
                   ref.status === 'pending' ? 'bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800' :
                   ref.status === 'approved' ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-900/20 dark:border-emerald-800' :
                   'bg-rose-50 text-rose-600 border-rose-200 dark:bg-rose-900/20 dark:border-rose-800'

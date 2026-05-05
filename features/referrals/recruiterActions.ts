@@ -13,7 +13,7 @@ export async function getRecruiterReferrals(recruiterProfileId: string) {
       company_feedback,
       job_title,
       note,
-      seeker: profiles!referrals_seeker_id_fkey ( full_name, email ),
+      seeker: profiles!referrals_seeker_id_fkey ( full_name, email, resume_url ),
       companies!inner ( profile_id )
     `)
     .eq('companies.profile_id', recruiterProfileId)

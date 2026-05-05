@@ -19,6 +19,7 @@ import {
   LayoutGrid
 } from 'lucide-react';
 import { ThemeToggle } from '@/components/layout/ThemeToggle';
+import { NotificationBell } from '@/components/ui/NotificationBell';
 
 interface Profile {
   full_name: string | null;
@@ -35,6 +36,7 @@ interface Stats {
 export default function RecruiterDashboard() {
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const [stats, setStats]     = useState<Stats>({ totalJobs: 0, activeJobs: 0, totalApplications: 0 });
   const [loading, setLoading] = useState(true);
 
@@ -47,6 +49,7 @@ export default function RecruiterDashboard() {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { router.push('/auth/login'); return; }
+      setUserId(user.id);
 
       const { data: prof } = await supabase
         .from('profiles')
@@ -118,6 +121,7 @@ export default function RecruiterDashboard() {
           </div>
           
           <div className="flex items-center gap-4">
+            {userId && <NotificationBell userId={userId} />}
             <ThemeToggle />
             <div className="h-4 w-[1px] bg-slate-200 dark:border-zinc-800" />
             <button

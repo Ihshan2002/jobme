@@ -18,11 +18,19 @@ import {
   MessageSquare
 } from 'lucide-react';
 import { ThemeToggle } from '@/components/layout/ThemeToggle';
+import { NotificationBell } from '@/components/ui/NotificationBell';
+
+import { ProfileStrengthMeter } from '@/features/profile/ProfileStrengthMeter';
 
 interface Profile {
   full_name: string | null;
   email: string;
   role: string;
+  bio?: string | null;
+  skills?: string[] | null;
+  experience?: string | null;
+  education?: string | null;
+  resume_url?: string | null;
 }
 
 interface Stats {
@@ -33,6 +41,7 @@ interface Stats {
 export default function SeekerDashboard() {
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const [stats, setStats]     = useState<Stats>({ applied: 0, saved: 0 });
   const [loading, setLoading] = useState(true);
 
@@ -45,10 +54,11 @@ export default function SeekerDashboard() {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { router.push('/auth/login'); return; }
+      setUserId(user.id);
 
       const { data: prof } = await supabase
         .from('profiles')
-        .select('full_name, email, role')
+        .select('*')
         .eq('id', user.id)
         .single();
 
@@ -98,6 +108,7 @@ export default function SeekerDashboard() {
           </div>
           
           <div className="flex items-center gap-4">
+            {userId && <NotificationBell userId={userId} />}
             <ThemeToggle />
             <div className="h-4 w-[1px] bg-slate-200 dark:border-zinc-800" />
             <button
@@ -135,6 +146,11 @@ export default function SeekerDashboard() {
             <Search className="h-4 w-4" />
             Explore Openings
           </Link>
+        </div>
+
+        {/* Profile Strength Meter */}
+        <div className="mb-10">
+          {profile && <ProfileStrengthMeter profile={profile} />}
         </div>
 
         {/* Stats Grid */}
